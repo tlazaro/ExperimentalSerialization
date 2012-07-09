@@ -7,6 +7,7 @@ object ProjectDefinition extends Build {
         "com.googlecode.json-simple" % "json-simple" % "1.1" % "optional"
       ),
       fork in test := true,
+      javacOptions ++= Seq("-source", "1.5", "-target", "1.5"),
       publishArtifact in (Compile, packageDoc) := false
     ) :_*)
 
