@@ -1,13 +1,25 @@
+#java specific
 *.class
-*.log
 
-# sbt specific
-dist/*
+## generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+
+# Eclipse ignore stuff
+.cache
+.project
+.classpath
+
+# SBT target
+project/target/
 target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
 
-# Scala-IDE specific
-.scala_dependencies
+# Netbeans ignore stuff
+.sbt-hack-lock
+/nbproject/private/
+/build/
+
+
