@@ -100,7 +100,11 @@ object BinarySerializerBench extends App {
     new java.util.Date,
     java.util.Calendar.getInstance,
     "Pelada cool".getBytes,
-    Array("arr1", "arr2", "arr3"))
+    Array("arr1", "arr2", "arr3"),
+    WeekDay.Fri,
+    WeekDay2.Fri,
+    ("puto", "puteco"),
+    (5, 10))
 
   val times = 200000
     

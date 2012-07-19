@@ -16,7 +16,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
   @inline private def casted[R](a: Any) = a.asInstanceOf[R]
   private[BuiltinTypeHandlers] trait BasicIntrospecImpl extends TypeHandler {
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef =
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef =
       ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this)
 
   }
@@ -165,11 +165,73 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     }
   }
 
+  val EnumerationHandler = new TypeHandler with BasicIntrospecImpl {
+    val handledTypes = Seq(classManifest[Enumeration#Value])
+    
+    def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
+      val enum = obj.asInstanceOf[Enumeration#Value]
+      
+      serializer.writeBlockStart(node.name, -1, -1, out)
+      serializer.writeString("enum", enum.getClass.getField("$outer").get(enum).getClass.getCanonicalName, out)
+      serializer.writeInt("id", enum.id, out)
+      serializer.writeBlockEnd(node.name, out)
+    }
+
+    def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
+      serializer.readBlockStart(node.name, -1, in)
+      
+      val className = serializer.readString("enum", in)
+      val companion = Class.forName(className) //find the object
+      require(companion != null, "companion object for class " + className + " not found!")
+      val moduleField = companion.getField("MODULE$")
+      require(moduleField != null, "coult not find companion singleton for class " + className)
+      val enumClass = moduleField.get().asInstanceOf[Enumeration]
+      
+      val res = enumClass(serializer.readInt("id", in))
+      serializer.readBlockEnd(node.name, in)
+      res
+    }
+  }
+  
+  val Tuple2Handler = new TypeHandler {
+    val handledTypes = Seq(classManifest[Tuple2[Any, Any]])
+
+    def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly two type paremeters")
+
+      val _1 = introspector.introspect("_1", typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], adapters, null)
+      val _2 = introspector.introspect("_2", typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], adapters, null)
+      (ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this) += _1) += _2
+    }
+
+    def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
+      val _1 = node.head
+      val _2 = node.tail.head
+      val tuple = obj.asInstanceOf[Tuple2[_, _]]
+
+      serializer.writeBlockStart(node.name, -1, -1, out)
+      serializer.write("_1", tuple._1, out)
+      serializer.write("_2", tuple._2, out)
+      serializer.writeBlockEnd(node.name, out)
+    }
+
+    def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
+      val _1 = node.head
+      val _2 = node.tail.head
+
+      serializer.readBlockStart(node.name, -1, in)
+      val res = (serializer.read(_1, None, in), serializer.read(_2, None, in))
+      serializer.readBlockEnd(node.name, in)
+      res
+    }
+  }
+
   val OptionHandler = new TypeHandler {
     val handledTypes = Seq(classManifest[Option[_]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
       require(typeInfo.typeArguments.length == 1, typeInfo.erasure.getName + " takes exactly one type paremeter")
       val opEntry = introspector.introspect("opTemplate", typeInfo.typeArguments.head.asInstanceOf[ClassManifest[_]], adapters, null)
       ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this) += opEntry
@@ -203,8 +265,8 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[Either[_, _]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
-      require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly one type paremeter")
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly two type paremeters")
       val left = introspector.introspect("left", typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], adapters, null)
       val right = introspector.introspect("right", typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], adapters, null)
       (ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this) += left) += right
@@ -244,7 +306,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq[ClassManifest[_]](classManifest[Array[Any]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
       val entry = introspector.introspect("entryTemplate",
         ReflectionUtilities.calculateManifest(typeInfo.erasure.getComponentType), adapters, null)
       ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this) += entry
@@ -283,7 +345,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq[ClassManifest[_]](classManifest[java.util.List[_]], classManifest[java.util.Set[_]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
       require(typeInfo.typeArguments.length == 1, typeInfo.erasure.getName + " takes exactly one type paremeter")
       val entry = introspector.introspect("entryTemplate", typeInfo.typeArguments.head.asInstanceOf[ClassManifest[_]], adapters, null)
       ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this) += entry
@@ -317,7 +379,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[java.util.Map[_, _]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
       require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly two type paremeter")
       val key = introspector.introspect("key", typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], adapters, null)
       val value = introspector.introspect("value", typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], adapters, null)
@@ -364,7 +426,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[collection.Traversable[Any]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
       require(typeInfo.typeArguments.length == 1, typeInfo.erasure.getName + " takes exactly one type paremeter")
       val entry = introspector.introspect("entryTemplate", typeInfo.typeArguments.head.asInstanceOf[ClassManifest[_]], adapters, null)
       ValueNode(nodeName, typeInfo, None, fieldProxy, lengthDescriptorSize, this) += entry
@@ -395,7 +457,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[collection.Map[_, _]])
 
     def introspect(introspector: Introspector, nodeName: String, typeInfo: ClassManifest[_],
-                   adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
+      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
       require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly two type paremeter")
       val key = introspector.introspect("key", typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], adapters, null)
       val value = introspector.introspect("value", typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], adapters, null)

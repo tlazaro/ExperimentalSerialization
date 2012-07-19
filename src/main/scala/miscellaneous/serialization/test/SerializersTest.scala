@@ -3,6 +3,17 @@ package test
 import scala.annotation.target.field
 
 object SerializersTest {
+
+  object WeekDay extends Enumeration {
+    type WeekDay = Value
+    val Mon, Tue, Wed, Thu, Fri, Sat, Sun = Value
+  }
+  
+  object WeekDay2 extends Enumeration {
+    type WeekDay2 = Value
+    val Mon, Tue, Wed, Thu, Fri, Sat, Sun = Value
+  }
+
   @Serializable
   case class Group(users: Seq[AllTypes] = Seq.empty){
     private def this() = this(null)
@@ -29,8 +40,13 @@ object SerializersTest {
                       @(SField @field)(14) date: java.util.Date,
                       @(SField @field)(15) cal: java.util.Calendar,
                       @(SField @field)(16) specializedByteArray: Array[Byte],
-                      @(SField @field)(17) simpleArray: Array[String]) {
-    private def this() = this(0, 0, 0, 0, 0, 0, false, '0', null, null, null, null, null, null, null, null, null, null)
+                      @(SField @field)(17) simpleArray: Array[String],
+                      @(SField @field)(18) weekDay: WeekDay.WeekDay,
+                      @(SField @field)(19) weekDay2: WeekDay2.WeekDay2,
+                      @(SField @field)(20) tuple2: (String, String),
+                      @(SField @field)(21) rawTuple2: (java.lang.Integer, java.lang.Integer)) {
+    private def this() = this(0, 0, 0, 0, 0, 0, false, '0', null, null, null, null, null, null, null, null, null, null,
+        WeekDay.Mon, WeekDay2.Mon, null, null)
   }
 }
 
@@ -49,7 +65,11 @@ object JsonSerializerTest extends App {
       new java.util.Date,
       java.util.Calendar.getInstance,
       Array(2,3,4,5,6,7,2,4,3),
-      Array("arr1", "arr2", "arr3"))
+      Array("arr1", "arr2", "arr3"),
+      WeekDay.Fri,
+      WeekDay2.Fri,
+      ("puto", "puteco"),
+      (5, 10))
       
   s.write(orig, baos)
   print("Writen: ")
@@ -84,7 +104,11 @@ object BinarySerializerTest extends App {
       new java.util.Date,
       java.util.Calendar.getInstance,
       "Pelada cool".getBytes,
-      Array("arr1", "arr2", "arr3"))
+      Array("arr1", "arr2", "arr3"),
+      WeekDay.Fri,
+      WeekDay2.Fri,
+      ("puto", "puteco"),
+      (5, 10))
       
   s.write(orig, baos)
   print(Console.BLUE + "Writen: ")
