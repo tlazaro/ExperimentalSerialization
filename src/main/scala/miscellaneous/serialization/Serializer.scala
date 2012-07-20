@@ -20,7 +20,7 @@ trait Serializer {
   }
 
   def write(name: String, typeInfo: ClassManifest[_], any: Any, out: OutputStream) {
-    write(introspector.introspect(name, typeInfo), any, out)
+    write(introspector.introspect(TypeInsight(name, typeInfo)), any, out)
   }
 
   def read[R: ClassManifest](in: InputStream): R = {

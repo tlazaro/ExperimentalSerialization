@@ -44,7 +44,7 @@ object SerializersTest {
                       @(SField @field)(18) weekDay: WeekDay.WeekDay,
                       @(SField @field)(19) weekDay2: WeekDay2.WeekDay2,
                       @(SField @field)(20) tuple2: (String, String),
-                      @(SField @field)(21) rawTuple2: (java.lang.Integer, java.lang.Integer)) {
+                      @(SField @field)(value=21, `type`=classOf[scala.Tuple2$mcII$sp]) rawTuple2: (Int, Int)) {
     private def this() = this(0, 0, 0, 0, 0, 0, false, '0', null, null, null, null, null, null, null, null, null, null,
         WeekDay.Mon, WeekDay2.Mon, null, null)
   }

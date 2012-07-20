@@ -8,15 +8,14 @@ import scala.collection.JavaConversions._
 trait Memoization extends Introspector {
   lazy val memo = new ConcurrentHashMap[Seq[Class[_]], NodeDef]
   
-  abstract override def introspectStruct(nodeName: String, typeInfo: ClassManifest[_],
-      adapters: Queue[Option[Adapter[_, _]]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): NodeDef = {
-    val flattenTypeInfo = manifestToClassSeq(typeInfo)
+  abstract override def introspectStruct(i: TypeInsight): NodeDef = {
+    val flattenTypeInfo = manifestToClassSeq(i.typeInfo)
     memo.get(flattenTypeInfo) match {
       case null =>
-	    val res = super.introspectStruct(nodeName, typeInfo, adapters, fieldProxy, lengthDescriptorSize)
+	    val res = super.introspectStruct(i)
 	    memo.putIfAbsent(flattenTypeInfo, res)
 	    res
-      case node => NodeRef(nodeName, node) 
+      case node => NodeRef(i.nodeName, node) 
     }
   }
 }
