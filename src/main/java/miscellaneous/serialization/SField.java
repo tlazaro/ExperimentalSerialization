@@ -2,7 +2,7 @@ package miscellaneous.serialization;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.FIELD)
+@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SField {
 
