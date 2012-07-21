@@ -107,10 +107,10 @@ class Introspector {
           case (settings, f: Field) =>
             f.setAccessible(true)
             introspect(TypeInsight(f.getName, ReflectionUtilities.calculateManifest(settings.hookType.getOrElse(f.getGenericType)),
-              Set.empty, settings.adapters, Some(sourceProvider.fieldSource(f)), settings.lengthDescriptorSize))
+              f.getAnnotations.toSet, settings.adapters, Some(sourceProvider.fieldSource(f)), settings.lengthDescriptorSize))
           case (settings, m: Method) =>
             introspect(TypeInsight(m.getName, ReflectionUtilities.calculateManifest(settings.hookType.getOrElse(m.getGenericReturnType)),
-              Set.empty, settings.adapters, Some(sourceProvider.fieldProxy(m)), settings.lengthDescriptorSize))
+              m.getAnnotations.toSet, settings.adapters, Some(sourceProvider.fieldProxy(m)), settings.lengthDescriptorSize))
         }
 
         res ++= nodes
