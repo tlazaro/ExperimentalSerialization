@@ -203,18 +203,14 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
   }
   
   val Tuple2Handler = new TypeHandler {
-    val handledTypes = Seq(classManifest[Tuple2[Any, Any]], classManifest[scala.Tuple2$mcII$sp])
+    val handledTypes = Seq(classManifest[Tuple2[Any, Any]])
 
     def introspect(introspector: Introspector, i: TypeInsight): NodeDef = {
-//      require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly two type paremeters")
+      require(i.typeInfo.typeArguments.length == 2, i.typeInfo.erasure.getName + " takes exactly two type paremeters")
       
-      val nodeTypes = if (i.typeInfo.typeArguments.length == 2) {
+      val nodeTypes = 
         (introspector.introspect(TypeInsight("_1", i.typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], Set.empty, i.adapters, null)),
             introspector.introspect(TypeInsight("_2", i.typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], Set.empty, i.adapters, null)))
-      } else {
-//            ValueNode("_2", classManifest[Int], None, None, 4, this))
-        (introspector.introspect[Int]("_1"), introspector.introspect[Int]("_2"))
-      }
       
       (ValueNode(i.nodeName, i.typeInfo, None, i.fieldProxy, i.lengthDescriptorSize, this) += nodeTypes._1) += nodeTypes._2
     }

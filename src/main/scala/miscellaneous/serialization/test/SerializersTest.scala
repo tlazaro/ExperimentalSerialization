@@ -44,7 +44,7 @@ object SerializersTest {
                       @(SField @field)(18) weekDay: WeekDay.WeekDay,
                       @(SField @field)(19) weekDay2: WeekDay2.WeekDay2,
                       @(SField @field)(20) tuple2: (String, String),
-                      @(SField @field)(value=21, `type`=classOf[scala.Tuple2$mcII$sp]) rawTuple2: (Int, Int)) {
+                      @(SField @field)(21)@(specializedFor @field)(Array(classOf[Int], classOf[Int])) rawTuple2: (Int, Int)) {
     private def this() = this(0, 0, 0, 0, 0, 0, false, '0', null, null, null, null, null, null, null, null, null, null,
         WeekDay.Mon, WeekDay2.Mon, null, null)
   }
@@ -54,7 +54,7 @@ object JsonSerializerTest extends App {
   import SerializersTest._
   import scala.collection.JavaConversions._
   
-  val s = new serializers.JsonSerializer(new Introspector with Memoization)
+  val s = new serializers.JsonSerializer(new Introspector with Memoization with SpecializationSupport)
   val baos = new java.io.ByteArrayOutputStream(150)
   val orig = AllTypes(200.asInstanceOf[Byte], 1000, Int.MaxValue, Long.MaxValue, 34.532f, Double.MaxValue,
       true, 'ó', "Crazy string with \"weird\" utf-8 characters: Áéíóú", SubType("subtype here"),
