@@ -43,8 +43,8 @@ object SerializersTest {
                       @(SField @field)(17) simpleArray: Array[String],
                       @(SField @field)(18) weekDay: WeekDay.WeekDay,
                       @(SField @field)(19) weekDay2: WeekDay2.WeekDay2,
-                      @(SField @field)(20) tuple2: (String, String),
-                      @(SField @field)(21)@(specializedFor @field)(Array(classOf[Int], classOf[Int])) rawTuple2: (Int, Int)) {
+                      @(SField @field)(20)@(specializedFor @field)(Array(classOf[Int], classOf[Int])) rawTuple2: (Int, Int),
+                      @(SField @field)(21)@(specializedFor @field)(Array(classOf[Int], classOf[String])) mixedTuple2: (Int, String)) {
     private def this() = this(0, 0, 0, 0, 0, 0, false, '0', null, null, null, null, null, null, null, null, null, null,
         WeekDay.Mon, WeekDay2.Mon, null, null)
   }
@@ -68,8 +68,8 @@ object JsonSerializerTest extends App {
       Array("arr1", "arr2", "arr3"),
       WeekDay.Fri,
       WeekDay2.Fri,
-      ("puto", "puteco"),
-      (5, 10))
+      (5, 10),
+      (14, "yeah"))
       
   s.write(orig, baos)
   print("Writen: ")
@@ -107,8 +107,8 @@ object BinarySerializerTest extends App {
       Array("arr1", "arr2", "arr3"),
       WeekDay.Fri,
       WeekDay2.Fri,
-      ("puto", "puteco"),
-      (5, 10))
+      (5, 10),
+      (14, "yeah"))
       
   s.write(orig, baos)
   print(Console.BLUE + "Writen: ")

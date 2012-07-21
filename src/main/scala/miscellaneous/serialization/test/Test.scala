@@ -103,8 +103,8 @@ object BinarySerializerBench extends App {
     Array("arr1", "arr2", "arr3"),
     WeekDay.Fri,
     WeekDay2.Fri,
-    ("puto", "puteco"),
-    (5, 10))
+    (5, 10),
+    (14, "yeah"))
 
   val times = 200000
     
