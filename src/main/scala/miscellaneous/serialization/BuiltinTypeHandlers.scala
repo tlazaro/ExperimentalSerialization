@@ -25,7 +25,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
 
       (ValueNode(i.nodeName, i.typeInfo, None, i.fieldProxy, i.lengthDescriptorSize, this) ++=
         i.typeInfo.typeArguments.zipWithIndex.map(zip =>
-          introspector.introspect(TypeInsight("T" + zip._2, zip._1.asInstanceOf[ClassManifest[_]], i.adapters, null))))
+          introspector.introspect(TypeInsight("T" + zip._2, zip._1.asInstanceOf[ClassManifest[_]], Set.empty, i.adapters, null))))
     }
   }
   
@@ -209,8 +209,8 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
 //      require(typeInfo.typeArguments.length == 2, typeInfo.erasure.getName + " takes exactly two type paremeters")
       
       val nodeTypes = if (i.typeInfo.typeArguments.length == 2) {
-        (introspector.introspect(TypeInsight("_1", i.typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], i.adapters, null)),
-            introspector.introspect(TypeInsight("_2", i.typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], i.adapters, null)))
+        (introspector.introspect(TypeInsight("_1", i.typeInfo.typeArguments(0).asInstanceOf[ClassManifest[_]], Set.empty, i.adapters, null)),
+            introspector.introspect(TypeInsight("_2", i.typeInfo.typeArguments(1).asInstanceOf[ClassManifest[_]], Set.empty, i.adapters, null)))
       } else {
 //            ValueNode("_2", classManifest[Int], None, None, 4, this))
         (introspector.introspect[Int]("_1"), introspector.introspect[Int]("_2"))
@@ -305,7 +305,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
 
     def introspect(introspector: Introspector, i: TypeInsight): NodeDef = {
       val entry = introspector.introspect(TypeInsight("entryTemplate",
-        ReflectionUtilities.calculateManifest(i.typeInfo.erasure.getComponentType), i.adapters, null))
+        ReflectionUtilities.calculateManifest(i.typeInfo.erasure.getComponentType), Set.empty, i.adapters, null))
       ValueNode(i.nodeName, i.typeInfo, None, i.fieldProxy, i.lengthDescriptorSize, this) += entry
     }
 
