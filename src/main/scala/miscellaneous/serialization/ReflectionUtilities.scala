@@ -4,7 +4,6 @@ import java.lang.reflect.{ Type, ParameterizedType }
 
 private[serialization] object ReflectionUtilities {
   def calculateManifest(typpe: Type): ClassManifest[_] = {
-    println("type: " + typpe)
     typpe match {
       case pt: ParameterizedType => new ClassManifest[AnyRef] {
         def erasure = pt.getRawType().asInstanceOf[Class[_]]
