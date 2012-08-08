@@ -1,10 +1,10 @@
+scalaVersion := "2.9.2"
+
 //name := "Serialization"
 
 //organization := "com.belfry.miscellaneous"
 
 //version := "2.0-SNAPSHOT"
-
-//scalaVersion := "2.9.1"
 
 //javaHome := Some(file("/usr/lib/jvm/java-7-openjdk-amd64/"))
 
