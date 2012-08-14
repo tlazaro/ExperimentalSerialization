@@ -31,7 +31,7 @@ class InstrospectionTestClass extends Base with Base2 {
   @SField(value = 4, adapters = Array(classOf[URLAdapter]))
   var url: java.net.URL = _
   @SField(5)
-  val javaList: java.util.List[String] = null
+  val javaList: java.util.List[String] = new java.util.ArrayList[String]
   @SField(6)
   val labels: Vector[String] = Vector.empty
   @SField(7)
@@ -39,7 +39,7 @@ class InstrospectionTestClass extends Base with Base2 {
 
   //evil recursion here!
   @SField(8)
-  val listsOfTestClasses: Vector[InstrospectionTestClass] = null
+  val listsOfTestClasses = scala.collection.mutable.Buffer[InstrospectionTestClass]()
 }
 
 @Serializable
@@ -135,8 +135,29 @@ object SerializationTest extends App {
     res.setLevel(Level.ALL)
     res
   }
-
+ 
+  val testClass = new InstrospectionTestClass
+  testClass.bippy = "bippy is setted"
+  testClass.foo = 34
+  testClass.bar = "bar is setted"
+  testClass.extraInfo = new ExtraInfo(System.currentTimeMillis, "extraInfo is setted")
+  testClass.url = new java.net.URL("http://this/is/da/url")
+  testClass.javaList add "someElement"
+  testClass.qux = "qux is now setted"
+  
   val intr = new Introspector with Memoization
-  val res = intr.introspect[InstrospectionTestClass]("")
+  val res = intr.introspect[InstrospectionTestClass]("testClass")
+  println(NodeDef.treeDebugString(res))
+  
+  
+  import scala.collection.JavaConversions._
+  val s = new serializers.JsonSerializer(intr)
+  val baos = new java.io.ByteArrayOutputStream(52 * 1024 * 1024)
+  s.write(testClass, baos)
+  baos.writeTo(System.out)
+  println()
+  val read = s.read[InstrospectionTestClass](new java.io.ByteArrayInputStream(baos.toByteArray))
+  println("read: ")
+  s.write(read, System.out)
   //  SerializationTreeForSwing.show(res)
 }

@@ -108,7 +108,7 @@ object MethodHandleSourceProvider extends SourceProvider {
   
   def constructorSource(clazz: Class[_]) = {
     unreflectedConstructors.get(clazz) getOrElse {
-      val constructor = clazz.getDeclaredConstructors.find(_.getParameterTypes().length == 0).get
+      val constructor = clazz.getDeclaredConstructors.find(_.getParameterTypes().length == 0).getOrElse(throw new IllegalArgumentException("Class " + clazz + " does not have a no-arg constructor"))
       constructor setAccessible true
       val unreflectedCons = lookup.unreflectConstructor(constructor)
       val res = new Source {

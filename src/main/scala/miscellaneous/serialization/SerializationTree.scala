@@ -35,6 +35,17 @@ trait NodeDef extends collection.mutable.Buffer[NodeDef] {
   //                fieldProxy: Option[FieldProxy] = this.fieldProxy,
   //                lengthDescriptorSize: Int = this.lengthDescriptorSize): this.type
 }
+object NodeDef {
+  def treeDebugString(n: NodeDef): String = {
+    val sb = new StringBuilder
+    n traverse {
+      case (node, depth) =>
+        sb append "  "*depth append node.description append "\n"
+        node match {case nr: NodeRef => false; case _ => true}
+    }
+    sb.toString
+  }
+}
 trait TypeDef extends NodeDef {
   def typeHandler: TypeHandler
 }
@@ -68,151 +79,3 @@ case class NodeRef(name: String, ref: NodeDef) extends NodeDef with collection.m
 
   lazy val self = ref
 }
-//trait SerializationTreeDef extends Tree {
-//  type Node <: super.NodeLike with NodeDef
-//
-//  def Struct(name: String, typeInfo: ClassManifest[_], adapter: Option[Adapter[_, _]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int): Fork
-//  def StructRef(name: String, struct: Fork): Fork
-//  def Value(name: String, typeInfo: ClassManifest[_], adapter: Option[Adapter[_, _]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int, typeHandler: TypeHandler): Fork with TypeDef
-//}
-//
-///**
-// * Direct instance of SerializationTreeDef
-// */
-//object SerializationTree extends Tree with SerializationTreeDef with TreeImpl {
-//  type Node = NodeDef with NodeLikeImpl
-//  type Fork = Node with ForkLikeImpl
-//  type Leaf = SNode with Nothing
-//
-//  private[SerializationTree] case class SNode(
-//      name: String,
-//      typeInfo: ClassManifest[_],
-//      adapter: Option[Adapter[_, _]],
-//      fieldProxy: Option[FieldProxy],
-//      lengthDescriptorSize: Int) extends NodeDef with ForkLikeImpl {
-//    override def toString = description
-//    
-//    def deepCopy(name: String,
-//                  typeInfo: ClassManifest[_],
-//                  adapter: Option[Adapter[_, _]],
-//                  fieldProxy: Option[FieldProxy],
-//                  lengthDescriptorSize: Int) =
-//      (SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) ++= this.map(_.deepCopy())).asInstanceOf[this.type]
-//  }
-//  def Struct(name: String, typeInfo: ClassManifest[_], adapter: Option[Adapter[_, _]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int) =
-//    SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize)
-//  def StructRef(name0: String, node: Fork): Fork = new NodeDef with ForkLikeImpl {
-//    def name = name0
-//    def typeInfo = node.typeInfo
-//    def adapter = node.adapter
-//    def fieldProxy = node.fieldProxy
-//    def lengthDescriptorSize = node.lengthDescriptorSize
-//    
-//    override lazy val self = node.self
-//    
-//    def deepCopy(name: String,
-//                  typeInfo: ClassManifest[_],
-//                  adapter: Option[Adapter[_, _]],
-//                  fieldProxy: Option[FieldProxy],
-//                  lengthDescriptorSize: Int) = StructRef(name, node.deepCopy()).asInstanceOf[this.type]
-//    override def toString = description
-//  }
-//
-//  def Value(name: String, typeInfo: ClassManifest[_], adapter: Option[Adapter[_, _]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int, handler: TypeHandler) =
-//    new SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) with TypeDef {
-//      lazy val typeHandler = handler
-//      
-//      override def deepCopy(name: String,
-//                             typeInfo: ClassManifest[_],
-//                             adapter: Option[Adapter[_, _]],
-//                             fieldProxy: Option[FieldProxy],
-//                             lengthDescriptorSize: Int) =
-//        (Value(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize, handler) ++= this.map(_.deepCopy())).asInstanceOf[this.type]
-//    }
-//}
-//
-///**
-// * This implementation of SerializationTreeDef makes the nodes compatible
-// * with a swing JTree.
-// */
-//object SerializationTreeForSwing extends SerializationTreeDef with SwingTree {
-//  deafTo(this)
-//
-//  type Node = NodeDef with SwingNode
-//  type Fork = Node with PublisherForkLike
-//  type Leaf = SNode with Nothing
-//  private[SerializationTreeForSwing] case class SNode(
-//      name: String,
-//      typeInfo: ClassManifest[_],
-//      adapter: Option[Adapter[_, _]],
-//      fieldProxy: Option[FieldProxy],
-//      lengthDescriptorSize: Int) extends NodeDef with SwingNode with PublisherForkLike {
-//    def equals(that: this.type) = nodeHash == that.nodeHash
-//    override def equals(that: Any) = that match {
-//      case that: this.type => equals(that)
-//      case _ => false
-//    }
-//    lazy val nodeHash = System.identityHashCode(this)
-//    override def hashCode = nodeHash
-//    override def toString = description
-//    
-//    def deepCopy(name: String,
-//                  typeInfo: ClassManifest[_],
-//                  adapter: Option[Adapter[_, _]],
-//                  fieldProxy: Option[FieldProxy],
-//                  lengthDescriptorSize: Int) =
-//      (SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) ++= this.map(_.deepCopy())).asInstanceOf[this.type]
-//  }
-//
-//  def Struct(name: String, typeInfo: ClassManifest[_], adapter: Option[Adapter[_, _]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int) =
-//    SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize)
-//  def StructRef(name0: String, node: Fork): Fork = new NodeDef with SwingNode with PublisherForkLike {
-//    def name = name0
-//    def typeInfo = node.typeInfo
-//    def adapter = node.adapter
-//    def fieldProxy = node.fieldProxy
-//    def lengthDescriptorSize = node.lengthDescriptorSize
-//    
-//    override lazy val self = node.self
-//    
-//    def deepCopy(name: String,
-//                  typeInfo: ClassManifest[_],
-//                  adapter: Option[Adapter[_, _]],
-//                  fieldProxy: Option[FieldProxy],
-//                  lengthDescriptorSize: Int) = StructRef(name, node.deepCopy()).asInstanceOf[this.type]
-//    lazy val nodeHash = node.nodeHash
-//    def equals(that: this.type) = nodeHash == that.nodeHash
-//    override def toString = description
-//  }
-//
-//  def Value(name: String, typeInfo: ClassManifest[_], adapter: Option[Adapter[_, _]], fieldProxy: Option[FieldProxy], lengthDescriptorSize: Int, handler: TypeHandler) =
-//    new SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) with TypeDef {
-//      lazy val typeHandler = handler
-//      
-//      override def deepCopy(name: String,
-//                             typeInfo: ClassManifest[_],
-//                             adapter: Option[Adapter[_, _]],
-//                             fieldProxy: Option[FieldProxy],
-//                             lengthDescriptorSize: Int) =
-//        (Value(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize, handler) ++= this.map(_.deepCopy())).asInstanceOf[this.type]
-//    }
-//
-//  def show(node: Node, modalDialog: Boolean = true) {
-//    import swing._
-//    import javax.swing._
-//    new JDialog {
-//      setTitle(node.name)
-//      setModal(modalDialog)
-//      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
-//
-//      new JTree(new miscellaneous.swing.tree.TreeModel(SerializationTreeForSwing.this) {
-//        lazy val root = node match {
-//          case fork: Fork => fork
-//        }
-//      }) -> (new JScrollPane center getContentPane)
-//
-//      pack()
-//      setLocationRelativeTo(null)
-//    }.setVisible(true)
-//  }
-//}

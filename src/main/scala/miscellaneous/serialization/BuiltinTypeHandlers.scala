@@ -24,7 +24,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[java.lang.Byte], ClassManifest.classType(java.lang.Byte.TYPE))
 
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
-      serializer.writeByte(node.name, casted(obj), out)
+      serializer.writeByte(node.name, casted[Number](obj).byteValue, out)
     }
     def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
       serializer.readByte(node.name, in)
@@ -34,7 +34,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[java.lang.Short], ClassManifest.classType(java.lang.Short.TYPE))
 
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
-      serializer.writeShort(node.name, casted(obj), out)
+      serializer.writeShort(node.name, casted[Number](obj).shortValue, out)
     }
     def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
       serializer.readShort(node.name, in)
@@ -54,7 +54,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[java.lang.Integer], ClassManifest.classType(java.lang.Integer.TYPE))
 
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
-      serializer.writeInt(node.name, casted(obj), out)
+      serializer.writeInt(node.name, casted[Number](obj).intValue, out)
     }
     def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
       serializer.readInt(node.name, in)
@@ -74,7 +74,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[java.lang.Float], ClassManifest.classType(java.lang.Float.TYPE))
 
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
-      serializer.writeFloat(node.name, casted(obj), out)
+      serializer.writeFloat(node.name, casted[Number](obj).floatValue, out)
     }
     def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
       serializer.readFloat(node.name, in)
@@ -84,7 +84,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     val handledTypes = Seq(classManifest[java.lang.Double], ClassManifest.classType(java.lang.Double.TYPE))
 
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
-      serializer.writeDouble(node.name, casted(obj), out)
+      serializer.writeDouble(node.name, casted[Number](obj).doubleValue, out)
     }
     def deserialize(node: NodeDef, serializer: Serializer, in: InputStream): Any = {
       serializer.readDouble(node.name, in)
