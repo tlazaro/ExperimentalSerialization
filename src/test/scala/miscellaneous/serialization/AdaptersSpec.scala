@@ -28,7 +28,7 @@ object TestAdapters {
       new java.util.Random(e(0) + 0)
     }
   }
-  
+
   class ArraysIntToDouble extends Adapter[Array[Int], Array[Double]] {
     override def marshall(obj: Array[Int]) = {
       obj map (_.toDouble)
@@ -38,12 +38,12 @@ object TestAdapters {
       e map (_.toInt)
     }
   }
-  
+
   class ArraysShortToInt extends Adapter[Array[Short], Array[Int]] {
     override def marshall(obj: Array[Short]) = {
       obj map (s => {
-       val int = s.toInt
-       if (int < 0) { int + 65535 } else int
+        val int = s.toInt
+        if (int < 0) { int + 65535 } else int
       })
     }
 
@@ -51,7 +51,7 @@ object TestAdapters {
       e map (_.toShort)
     }
   }
-  
+
   class ArraysIntToListString extends Adapter[Array[Int], List[String]] {
     override def marshall(obj: Array[Int]) = {
       throw new Exception("You are marshalling...")
@@ -63,7 +63,7 @@ object TestAdapters {
       e map (_.toInt) toArray
     }
   }
-  
+
   class ArraysIntToString extends Adapter[Array[Int], Array[String]] {
     override def marshall(obj: Array[Int]) = {
       throw new Exception("You are marshalling...")
@@ -105,12 +105,12 @@ object AdaptersSpec {
         return false
       }
       val o = obj.asInstanceOf[ArraysMock]
-      strings.deep == o.strings.deep && booleans.deep == o.booleans.deep && bytes.deep == o.bytes.deep &&
-        chars.deep == o.chars.deep && shorts.deep == o.shorts.deep && ints.deep == o.ints.deep &&
-        longs.deep == o.longs.deep && floats.deep == o.floats.deep && doubles.deep == o.doubles.deep
+      strings.sameElements(o.strings) && booleans.sameElements(o.booleans) && bytes.sameElements(o.bytes) &&
+        chars.sameElements(o.chars) && shorts.sameElements(o.shorts) && ints.sameElements(o.ints) &&
+        longs.sameElements(o.longs) && floats.sameElements(o.floats) && doubles.sameElements(o.doubles)
     }
   }
-  
+
   @Serializable
   class ArraysAdaptersMock(
     @(SField @field)(0) val strings: Array[String],
@@ -135,9 +135,9 @@ object AdaptersSpec {
         return false
       }
       val o = obj.asInstanceOf[ArraysAdaptersMock]
-      strings.deep == o.strings.deep && booleans.deep == o.booleans.deep && bytes.deep == o.bytes.deep &&
-        chars.deep == o.chars.deep && shorts.deep == o.shorts.deep && ints.deep == o.ints.deep &&
-        longs.deep == o.longs.deep && floats.deep == o.floats.deep && doubles.deep == o.doubles.deep
+      strings.sameElements(o.strings) && booleans.sameElements(o.booleans) && bytes.sameElements(o.bytes) &&
+        chars.sameElements(o.chars) && shorts.sameElements(o.shorts) && ints.sameElements(o.ints) &&
+        longs.sameElements(o.longs) && floats.sameElements(o.floats) && doubles.sameElements(o.doubles)
     }
   }
 
@@ -195,7 +195,7 @@ class AdaptersSpec extends FlatSpec with ShouldMatchers {
       orig should equal(res)
     }
   }
-  
+
   it should "adapt raw datatype arrays" in {
     val orig = new ArraysAdaptersMock(
       Array("hello", "goodbye"),
