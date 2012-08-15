@@ -71,12 +71,10 @@ class Introspector {
     val adapter = if (i.adapters.isEmpty) None else i.adapters.dequeue
     val res = adapter match {
       case a @ Some(adapter) =>
-        val res = SNode(i.nodeName, i.typeInfo, a, i.fieldProxy, i.lengthDescriptorSize)
+        val res = introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)).nodeCopy(i.nodeName, i.typeInfo, adapter = a, i.fieldProxy, i.lengthDescriptorSize)
         analysisStack(linearizedManifest) = res
-        introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)) match {
-          case fork: collection.mutable.Buffer[_] => res ++= fork
-          case leaf => res += leaf
-        }
+//        val res = SNode(i.nodeName, i.typeInfo, a, i.fieldProxy, i.lengthDescriptorSize)
+//        res ++= introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)) 
         res
       case _ =>
         //before analyzing its structure, it must prove to be serializable.

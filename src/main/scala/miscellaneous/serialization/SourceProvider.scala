@@ -65,6 +65,7 @@ object ReflectionSourceProvider extends SourceProvider {
   def fieldSource(field: Field) = new FieldProxy {
     def setValue(obj: AnyRef, value: Any) = field.set(obj, value)
     def getValue(obj: AnyRef): Any = field.get(obj)
+    override def toString = "ReflectionFieldProxy[" + field + "]"
   }
 
   def constructorSource(clazz: Class[_]) = new Source {
@@ -75,13 +76,16 @@ object ReflectionSourceProvider extends SourceProvider {
       case seq: Seq[_] => constructor.newInstance(seq.asInstanceOf[Seq[AnyRef]]: _*)
       case other => constructor.newInstance(other)
     }
+    override def toString = "ReflectionConstructorSource[" + clazz + "]"
   }
 
   def methodSource(m: Method) = new Source {
     def getValue(obj: AnyRef): Any = m.invoke(obj)
+    override def toString = "ReflectionMethodSource[" + m + "]"
   }
   def methodSink(m: Method) = new Sink {
     def setValue(obj: AnyRef, value: Any) = m.invoke(obj, value.asInstanceOf[AnyRef])
+    override def toString = "ReflectionMethodSink[" + m + "]"
   }
 }
 
@@ -95,15 +99,18 @@ object MethodHandleSourceProvider extends SourceProvider {
     private[this] val mhsetter = lookup.unreflectSetter(field)
     def setValue(obj: AnyRef, value: Any) = mhsetter.invokeWithArguments(obj, value.asInstanceOf[AnyRef])
     def getValue(obj: AnyRef): Any = mhgetter.invokeWithArguments(Array(obj): _*)
+    override def toString = "MethodHandleFieldProxy[" + field + "]"
   }
 
   def methodSource(m: Method) = new Source {
     private[this] val mhgetter = lookup.unreflect(m)
     def getValue(obj: AnyRef): Any = mhgetter.invokeWithArguments(obj)
+    override def toString = "MethodHandleMethodSource[" + m + "]"
   }
   def methodSink(m: Method) = new Sink {
     private[this] val mhsetter = lookup.unreflect(m)
     def setValue(obj: AnyRef, value: Any) = mhsetter.invokeWithArguments(obj, value.asInstanceOf[AnyRef])
+    override def toString = "MethodHandleMethodSink[" + m + "]"
   }
   
   def constructorSource(clazz: Class[_]) = {
@@ -117,6 +124,7 @@ object MethodHandleSourceProvider extends SourceProvider {
           case seq: Seq[_] => unreflectedCons.invokeWithArguments(seq.asInstanceOf[Seq[AnyRef]]: _*)
           case other => unreflectedCons.invokeWithArguments(other)
         }
+        override def toString = "MethodHandleConstructorSource[" + clazz + "]"
       }
       unreflectedConstructors(clazz) = res
       res

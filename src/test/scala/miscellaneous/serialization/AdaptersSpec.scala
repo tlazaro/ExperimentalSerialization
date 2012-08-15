@@ -83,15 +83,15 @@ object AdaptersSpec {
 
   @Serializable
   class ArraysMock(
-    @(SField @field)(0) val strings: Array[String],
-    @(SField @field)(1) val booleans: Array[Boolean],
-    @(SField @field)(2) val bytes: Array[Byte],
-    @(SField @field)(3) val chars: Array[Char],
-    @(SField @field)(4) val shorts: Array[Short],
-    @(SField @field)(5) val ints: Array[Int],
-    @(SField @field)(6) val longs: Array[Long],
-    @(SField @field)(7) val floats: Array[Float],
-    @(SField @field)(8) val doubles: Array[Double]) {
+      @(SField @field)(0) val strings: Array[String],
+      @(SField @field)(1) val booleans: Array[Boolean],
+      @(SField @field)(2) val bytes: Array[Byte],
+      @(SField @field)(3) val chars: Array[Char],
+      @(SField @field)(4) val shorts: Array[Short],
+      @(SField @field)(5) val ints: Array[Int],
+      @(SField @field)(6) val longs: Array[Long],
+      @(SField @field)(7) val floats: Array[Float],
+      @(SField @field)(8) val doubles: Array[Double]) {
 
     private def this() = this(null, null, null, null, null, null, null, null, null)
 
@@ -113,15 +113,15 @@ object AdaptersSpec {
 
   @Serializable
   class ArraysAdaptersMock(
-    @(SField @field)(0) val strings: Array[String],
-    @(SField @field)(1) val booleans: Array[Boolean],
-    @(SField @field)(2) val bytes: Array[Byte],
-    @(SField @field)(3) val chars: Array[Char],
-    @(SField @field)(value = 4, adapters = Array(classOf[ArraysShortToInt])) val shorts: Array[Short],
-    @(SField @field)(value = 5, adapters = Array(classOf[ArraysIntToListString])) val ints: Array[Int],
-    @(SField @field)(6) val longs: Array[Long],
-    @(SField @field)(7) val floats: Array[Float],
-    @(SField @field)(8) val doubles: Array[Double]) {
+      @(SField @field)(0) val strings: Array[String],
+      @(SField @field)(1) val booleans: Array[Boolean],
+      @(SField @field)(2) val bytes: Array[Byte],
+      @(SField @field)(3) val chars: Array[Char],
+      @(SField @field)(value = 4, adapters = Array(classOf[ArraysShortToInt])) val shorts: Array[Short],
+      @(SField @field)(value = 5, adapters = Array(classOf[ArraysIntToListString])) val ints: Array[Int],
+      @(SField @field)(6) val longs: Array[Long],
+      @(SField @field)(7) val floats: Array[Float],
+      @(SField @field)(8) val doubles: Array[Double]) {
 
     private def this() = this(null, null, null, null, null, null, null, null, null)
 
@@ -143,9 +143,9 @@ object AdaptersSpec {
 
   @Serializable
   class BasicObjects(
-    @(SField @field)(0) val seed: Long,
-    @(SField @field)(value = 1, adapters = Array(classOf[URLAdapter])) val url: java.net.URL,
-    @(SField @field)(value = 2, adapters = Array(classOf[SerializableAdapter])) val rng: Random) {
+      @(SField @field)(0) val seed: Long,
+      @(SField @field)(value = 1, adapters = Array(classOf[URLAdapter])) val url: java.net.URL,
+      @(SField @field)(value = 2, adapters = Array(classOf[SerializableAdapter])) val rng: Random) {
 
     private def this() = this(0, null, null)
     override def toString() = "BasicObjects: " + url + " " + rng
@@ -164,9 +164,10 @@ object AdaptersSpec {
 class AdaptersSpec extends FlatSpec with ShouldMatchers {
   import AdaptersSpec._
 
+  val introspector = new Introspector with Memoization with SpecializationSupport
   val srlzrs = Map(
-    ".json" -> new serializers.JsonSerializer(new Introspector with Memoization with SpecializationSupport),
-    ".dat" -> new serializers.BinarySerializer(new Introspector with Memoization with SpecializationSupport))
+    ".json" -> new serializers.JsonSerializer(introspector),
+    ".dat" -> new serializers.BinarySerializer(introspector))
 
   val testDir = new java.io.File("target/test/" + this.getClass.getName)
   testDir.mkdirs()
@@ -207,6 +208,7 @@ class AdaptersSpec extends FlatSpec with ShouldMatchers {
       Array(1234567L, 1234567L),
       Array(123456.7f, 123456.7f),
       Array(123456.78, 123456.78))
+    info("ArraysAdaptersMock structure:\n" + NodeDef.treeDebugString(introspector.introspect[ArraysAdaptersMock]("ArraysAdaptersMock")))
 
     for ((extension, serializer) <- srlzrs) {
       val written = writeFile(orig, orig.getClass.getSimpleName + extension, serializer)
@@ -217,6 +219,7 @@ class AdaptersSpec extends FlatSpec with ShouldMatchers {
 
   it should "pretty much work" in {
     val orig = new BasicObjects(12345L, new java.net.URL("http://www.google.com"), new Random(12345L))
+    info("ArraysAdaptersMock structure:\n" + NodeDef.treeDebugString(introspector.introspect[BasicObjects]("BasicObjects")))
 
     for ((extension, serializer) <- srlzrs) {
       val written = writeFile(orig, orig.getClass.getSimpleName + extension, serializer)

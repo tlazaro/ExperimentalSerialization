@@ -64,13 +64,15 @@ trait Serializer {
 
   def write(node: NodeDef, obj: Any, out: OutputStream) {
     @inline def valueforNode(node: NodeDef) = {
-      val res = if (node.fieldProxy.isDefined)
+      val res = if (node.fieldProxy.isDefined) {
+//        println("Retrieving value from field " + node + " using " + node.fieldProxy)
         node.fieldProxy.get.getValue(obj.asInstanceOf[AnyRef])
-      else
-        obj
+      } else obj
       node.adapter match {
-        case Some(adapter) => adapter.asInstanceOf[Adapter[Any, Any]].marshall(res)
-        case _ => res
+        case Some(adapter) =>
+//          println("Marshalling " + res + " through " + adapter + " on node " + node)
+          adapter.asInstanceOf[Adapter[Any, Any]].marshall(res)
+        case _             => res
       }
     }
     try {
@@ -84,7 +86,7 @@ trait Serializer {
       }
     } catch {
       case se: SerializationException => throw se
-      case other => throw new SerializationException("Exception ocurred writing node: " + node.description + ", value = " + obj, other)
+      case other                      => throw new SerializationException("Exception ocurred writing node: " + node.description + ", value = " + obj, other)
     }
   }
 
@@ -94,7 +96,6 @@ trait Serializer {
    * that need it.
    */
   protected def writeStructNodes(nodes: Seq[NodeDef], valueForNode: NodeDef => Any, out: OutputStream) {
-    //I would like to apply a type matching pattern on the for instead of the cast, but is not supported :(
     for (node <- nodes) {
       write(node, valueForNode(node), out)
     }
@@ -127,7 +128,7 @@ trait Serializer {
   private[this] val noArgs = new Array[AnyRef](0)
   def read(node: NodeDef, target: Option[AnyRef], in: InputStream): Any = {
     try {
-      node match {
+      val res = node match {
         case node: TypeDef => node.typeHandler.deserialize(node, this, in)
         case struct =>
           val valueObj = target.getOrElse {
@@ -142,14 +143,15 @@ trait Serializer {
               fieldProxy.get.setValue(valueObj, read(f, None, in))
           }
           readBlockEnd(struct.name, in)
-          node.adapter match {
-            case Some(adapter) => adapter.asInstanceOf[Adapter[Any, Any]].unmarshall(valueObj)
-            case _ => valueObj
-          }
+          valueObj
+      }
+      node.adapter match {
+        case Some(adapter) => adapter.asInstanceOf[Adapter[Any, Any]].unmarshall(res)
+        case _  => res
       }
     } catch {
       case se: SerializationException => throw se
-      case other => throw new SerializationException("Exception ocurred reading node: " + node.description, other)
+      case other                      => throw new SerializationException("Exception ocurred reading node: " + node.description, other)
     }
   }
 

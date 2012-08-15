@@ -24,24 +24,25 @@ trait NodeDef extends collection.mutable.Buffer[NodeDef] {
     def recurse(node: NodeDef, depth: Int) {
       if (f.isDefinedAt(node, depth)) {
         if (f(node, depth)) node foreach (recurse(_, depth + 1))
-      }  
+      }
     }
     recurse(this, 0)
   }
-  
-  //  def deepCopy(name: String = this.name,
-  //                typeInfo: ClassManifest[_] = this.typeInfo,
-  //                adapter: Option[Adapter[_, _]] = this.adapter,
-  //                fieldProxy: Option[FieldProxy] = this.fieldProxy,
-  //                lengthDescriptorSize: Int = this.lengthDescriptorSize): this.type
+
+  def nodeCopy(name: String = this.name,
+               typeInfo: ClassManifest[_] = this.typeInfo,
+               adapter: Option[Adapter[_, _]] = this.adapter,
+               fieldProxy: Option[FieldProxy] = this.fieldProxy,
+               lengthDescriptorSize: Int = this.lengthDescriptorSize): NodeDef
+
 }
 object NodeDef {
   def treeDebugString(n: NodeDef): String = {
     val sb = new StringBuilder
     n traverse {
       case (node, depth) =>
-        sb append "  "*depth append node.description append "\n"
-        node match {case nr: NodeRef => false; case _ => true}
+        sb append "  " * depth append node.description append "\n"
+        node match { case nr: NodeRef => false; case _ => true }
     }
     sb.toString
   }
@@ -50,13 +51,22 @@ trait TypeDef extends NodeDef {
   def typeHandler: TypeHandler
 }
 
+/**
+ * A Serialization Node represents a class marked @Serializable
+ */
 case class SNode(name: String,
                  typeInfo: ClassManifest[_],
                  adapter: Option[Adapter[_, _]],
                  fieldProxy: Option[FieldProxy],
                  lengthDescriptorSize: Int) extends NodeDef with collection.mutable.BufferProxy[NodeDef] {
   lazy val self = new collection.mutable.ArrayBuffer[NodeDef]
-  
+
+  def nodeCopy(name: String = this.name,
+               typeInfo: ClassManifest[_] = this.typeInfo,
+               adapter: Option[Adapter[_, _]] = this.adapter,
+               fieldProxy: Option[FieldProxy] = this.fieldProxy,
+               lengthDescriptorSize: Int = this.lengthDescriptorSize) = copy(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) ++= this
+
   override def toString = description
 }
 
@@ -66,8 +76,14 @@ object ValueNode {
             adapter: Option[Adapter[_, _]],
             fieldProxy: Option[FieldProxy],
             lengthDescriptorSize: Int,
-            typeHandler0: TypeHandler) = new SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) with TypeDef {
+            typeHandler0: TypeHandler): SNode with TypeDef = new SNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize) with TypeDef {
     val typeHandler = typeHandler0
+
+    override def nodeCopy(name: String = this.name,
+                          typeInfo: ClassManifest[_] = this.typeInfo,
+                          adapter: Option[Adapter[_, _]] = this.adapter,
+                          fieldProxy: Option[FieldProxy] = this.fieldProxy,
+                          lengthDescriptorSize: Int = this.lengthDescriptorSize) = ValueNode(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize, typeHandler0) ++= this
   }
 }
 
@@ -78,4 +94,9 @@ case class NodeRef(name: String, ref: NodeDef) extends NodeDef with collection.m
   def lengthDescriptorSize = ref.lengthDescriptorSize
 
   lazy val self = ref
+  def nodeCopy(name: String = this.name,
+               typeInfo: ClassManifest[_] = this.typeInfo,
+               adapter: Option[Adapter[_, _]] = this.adapter,
+               fieldProxy: Option[FieldProxy] = this.fieldProxy,
+               lengthDescriptorSize: Int = this.lengthDescriptorSize) = ref.nodeCopy(name, typeInfo, adapter, fieldProxy, lengthDescriptorSize)
 }
