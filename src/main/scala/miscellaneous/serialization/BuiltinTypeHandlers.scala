@@ -285,7 +285,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
 
     def introspect(introspector: Introspector, i: TypeInsight): NodeDef = {
       val entry = introspector.introspect(TypeInsight("entryTemplate",
-        ReflectionUtilities.calculateManifest(i.typeInfo.erasure.getComponentType), Set.empty, i.adapters, null))
+        ReflectionUtilities.calculateManifest(i.typeInfo.erasure.getComponentType), Set.empty, i.adapters))
       ValueNode(i.nodeName, i.typeInfo, None, i.fieldProxy, i.lengthDescriptorSize, this) += entry
     }
 

@@ -64,10 +64,13 @@ trait Serializer {
 
   def write(node: NodeDef, obj: Any, out: OutputStream) {
     @inline def valueforNode(node: NodeDef) = {
-      val res = if (node.fieldProxy.isDefined) node.fieldProxy.get.getValue(obj.asInstanceOf[AnyRef]) else obj
+      val res = if (node.fieldProxy.isDefined)
+        node.fieldProxy.get.getValue(obj.asInstanceOf[AnyRef])
+      else
+        obj
       node.adapter match {
         case Some(adapter) => adapter.asInstanceOf[Adapter[Any, Any]].marshall(res)
-        case _             => res
+        case _ => res
       }
     }
     try {
@@ -81,7 +84,7 @@ trait Serializer {
       }
     } catch {
       case se: SerializationException => throw se
-      case other                      => throw new SerializationException("Exception ocurred writing node: " + node.description + ", value = " + obj, other)
+      case other => throw new SerializationException("Exception ocurred writing node: " + node.description + ", value = " + obj, other)
     }
   }
 
@@ -141,12 +144,12 @@ trait Serializer {
           readBlockEnd(struct.name, in)
           node.adapter match {
             case Some(adapter) => adapter.asInstanceOf[Adapter[Any, Any]].unmarshall(valueObj)
-            case _             => valueObj
+            case _ => valueObj
           }
       }
     } catch {
       case se: SerializationException => throw se
-      case other                      => throw new SerializationException("Exception ocurred reading node: " + node.description, other)
+      case other => throw new SerializationException("Exception ocurred reading node: " + node.description, other)
     }
   }
 
