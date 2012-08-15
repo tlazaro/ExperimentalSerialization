@@ -18,14 +18,4 @@ object BuiltinAdapters {
       obj.asInstanceOf[java.io.Serializable]
     }
   }
-  
-  class SerializableAdapterTest extends Adapter[java.io.Serializable, Array[java.lang.Integer]] {
-    override def marshall(obj: java.io.Serializable) = {
-      (1 to 10).toArray map (new java.lang.Integer(_)) toArray
-    }
-
-    override def unmarshall(e: Array[java.lang.Integer]) = {
-      new java.util.Random(e(0)+0)
-    }
-  }
 }
