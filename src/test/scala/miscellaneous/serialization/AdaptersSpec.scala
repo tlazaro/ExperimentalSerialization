@@ -52,6 +52,18 @@ object TestAdapters {
     }
   }
   
+  class ArraysIntToListString extends Adapter[Array[Int], List[String]] {
+    override def marshall(obj: Array[Int]) = {
+      throw new Exception("You are marshalling...")
+      obj map (_ + "") toList
+    }
+
+    override def unmarshall(e: List[String]) = {
+      throw new Exception("You are unmarshalling...")
+      e map (_.toInt) toArray
+    }
+  }
+  
   class ArraysIntToString extends Adapter[Array[Int], Array[String]] {
     override def marshall(obj: Array[Int]) = {
       throw new Exception("You are marshalling...")
@@ -106,7 +118,7 @@ object AdaptersSpec {
     @(SField @field)(2) val bytes: Array[Byte],
     @(SField @field)(3) val chars: Array[Char],
     @(SField @field)(value = 4, adapters = Array(classOf[ArraysShortToInt])) val shorts: Array[Short],
-    @(SField @field)(value = 5, adapters = Array(classOf[ArraysIntToString])) val ints: Array[Int],
+    @(SField @field)(value = 5, adapters = Array(classOf[ArraysIntToListString])) val ints: Array[Int],
     @(SField @field)(6) val longs: Array[Long],
     @(SField @field)(7) val floats: Array[Float],
     @(SField @field)(8) val doubles: Array[Double]) {
@@ -133,7 +145,7 @@ object AdaptersSpec {
   class BasicObjects(
     @(SField @field)(0) val seed: Long,
     @(SField @field)(value = 1, adapters = Array(classOf[URLAdapter])) val url: java.net.URL,
-    @(SField @field)(value = 2, adapters = Array(classOf[SerializableAdapterTest])) val rng: Random) {
+    @(SField @field)(value = 2, adapters = Array(classOf[SerializableAdapter])) val rng: Random) {
 
     private def this() = this(0, null, null)
     override def toString() = "BasicObjects: " + url + " " + rng
