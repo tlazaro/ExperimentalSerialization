@@ -11,7 +11,7 @@ private[serialization] object ReflectionUtilities {
         override def toString = (if (erasure.isArray) "Array" else erasure.getName) + argString
       }
       case clazz: Class[_] => ClassManifest.classType(clazz)
-      case _               => throw new IllegalArgumentException
+      case other           => throw new IllegalArgumentException("Cannot calculate the manifest for types which are not ParameterizedTypes or Classes. Found: " + other)
     }
   }
 

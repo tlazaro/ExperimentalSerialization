@@ -6,5 +6,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface specializedFor {
 
-  Class<?>[] value();
+  Class<?> target();
+  Class<?>[] params();
 }

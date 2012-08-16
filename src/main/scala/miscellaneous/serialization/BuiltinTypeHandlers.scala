@@ -171,8 +171,9 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
       val enum = obj.asInstanceOf[Enumeration#Value]
       
+      
       serializer.writeBlockStart(node.name, -1, -1, out)
-      serializer.writeString("enum", enum.getClass.getField("$outer").get(enum).getClass.getCanonicalName, out)
+      serializer.writeString("enum", enum.getClass.getField("$outer").get(enum).getClass.getName, out)
       serializer.writeInt("id", enum.id, out)
       serializer.writeBlockEnd(node.name, out)
     }

@@ -239,7 +239,7 @@ class AdaptersSpec extends FlatSpec with ShouldMatchers {
   }
   
   "An adapter" should "only adapt its origin type" in {
-    intercept[IllegalArgumentException] {
+    intercept[IntrospectionException] {
       introspector.introspect[ClassWithWrongAdapter]("classWithWrongAdapter")
     }
   }
