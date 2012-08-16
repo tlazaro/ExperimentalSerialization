@@ -155,8 +155,7 @@ object AdaptersSpec {
         return false
       }
       val o = obj.asInstanceOf[BasicObjects]
-      //      rng == o.rng
-      true
+      seed == o.seed && url == o.url // Random cannot be compared
     }
   }
 }
@@ -221,10 +220,15 @@ class AdaptersSpec extends FlatSpec with ShouldMatchers {
     val orig = new BasicObjects(12345L, new java.net.URL("http://www.google.com"), new Random(12345L))
     info("ArraysAdaptersMock structure:\n" + NodeDef.treeDebugString(introspector.introspect[BasicObjects]("BasicObjects")))
 
-    for ((extension, serializer) <- srlzrs) {
+    val read = for ((extension, serializer) <- srlzrs) yield {
       val written = writeFile(orig, orig.getClass.getSimpleName + extension, serializer)
       val res = serializer.read[BasicObjects](written)
-      orig should equal(res)
+      res
     }
+    
+    read.forall(orig == _) should equal(true)
+    val next = orig.rng.nextInt()
+    info("The rngs should produce the same result: " + next)
+    read.map(_.rng.nextInt()).forall(_ == next) should equal(true)
   }
 }
