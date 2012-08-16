@@ -68,9 +68,10 @@ class Introspector {
     val linearizedManifest = manifestToClassSeq(i.typeInfo)
     analysisStack.get(linearizedManifest) foreach { n => return NodeRef(i.nodeName, n) }
 
-    val adapter = if (i.adapters.isEmpty) None else i.adapters.dequeue
+    val adapter = if (i.adapters.isEmpty) None else i.adapters.front
     val res = adapter match {
-      case a @ Some(adapter) =>
+      case a @ Some(adapter) if ReflectionUtilities.isSubtype(i.typeInfo, adapter.fromTypeInfo) =>
+        i.adapters.dequeue //remove the first element
         val res = introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)).nodeCopy(i.nodeName, i.typeInfo, adapter = a, i.fieldProxy, i.lengthDescriptorSize)
         analysisStack(linearizedManifest) = res
 //        val res = SNode(i.nodeName, i.typeInfo, a, i.fieldProxy, i.lengthDescriptorSize)
