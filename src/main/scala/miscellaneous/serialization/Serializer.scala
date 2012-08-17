@@ -85,8 +85,7 @@ trait Serializer {
           writeBlockEnd(node.name, out)
       }
     } catch {
-      case se: SerializationException => throw se
-      case other                      => throw new SerializationException("Exception ocurred writing node: " + node.description + ", value = " + obj, other)
+      case other => throw new SerializationException("Exception ocurred writing node: " + node.description + ", value = " + obj, other)
     }
   }
 
