@@ -160,6 +160,12 @@ object AdaptersSpec {
   }
 }
 
+@Serializable
+class ClassWithWrongAdapter(
+    @(SField @field)(value = 0, adapters = Array(classOf[URLAdapter])) val wronglyAdaptedField: java.net.HttpCookie) {
+  private def this() = this(null)
+}
+
 class AdaptersSpec extends FlatSpec with ShouldMatchers {
   import AdaptersSpec._
 
@@ -230,5 +236,11 @@ class AdaptersSpec extends FlatSpec with ShouldMatchers {
     val next = orig.rng.nextInt()
     info("The rngs should produce the same result: " + next)
     read.map(_.rng.nextInt()).forall(_ == next) should equal(true)
+  }
+  
+  "An adapter" should "only adapt its origin type" in {
+    intercept[IntrospectionException] {
+      introspector.introspect[ClassWithWrongAdapter]("classWithWrongAdapter")
+    }
   }
 }

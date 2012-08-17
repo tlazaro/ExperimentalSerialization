@@ -5,6 +5,8 @@ import java.lang.reflect._
 import scala.collection.mutable.{ Queue, Stack, HashMap }
 import scala.annotation.Annotation
 
+class IntrospectionException(msg: String = null, cause: Throwable = null) extends RuntimeException(msg, cause)
+
 class Introspector {
 
   val sourceProvider = {
@@ -49,12 +51,14 @@ class Introspector {
   }
 
   def introspect(i: TypeInsight): NodeDef = {
-    HandledTypesRegistry.handlerFor(i.typeInfo) match {
-      case Some(handler) => handler.introspect(this, i)
-      case _ =>
-        //if it wasn't a type, then consider it a struct.
-        introspectStruct(i)
-    }
+    try {
+      HandledTypesRegistry.handlerFor(i.typeInfo) match {
+        case Some(handler) => handler.introspect(this, i)
+        case _ =>
+          //if it wasn't a type, then consider it a struct.
+          introspectStruct(i)
+      }
+    } catch { case ex => throw new IntrospectionException("Exception introspecting node " + i, ex)}
   }
 
   private[this] val analysisStackThreadLocal = new ThreadLocal[HashMap[Seq[Class[_]], NodeDef]] {
@@ -68,13 +72,14 @@ class Introspector {
     val linearizedManifest = manifestToClassSeq(i.typeInfo)
     analysisStack.get(linearizedManifest) foreach { n => return NodeRef(i.nodeName, n) }
 
-    val adapter = if (i.adapters.isEmpty) None else i.adapters.dequeue
+    val adapter = if (i.adapters.isEmpty) None else i.adapters.front
     val res = adapter match {
-      case a @ Some(adapter) =>
+      case a@Some(adapter) if ReflectionUtilities.isSubtype(i.typeInfo, adapter.fromTypeInfo) =>
+        i.adapters.dequeue //remove the first element
         val res = introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)).nodeCopy(i.nodeName, i.typeInfo, adapter = a, i.fieldProxy, i.lengthDescriptorSize)
         analysisStack(linearizedManifest) = res
-//        val res = SNode(i.nodeName, i.typeInfo, a, i.fieldProxy, i.lengthDescriptorSize)
-//        res ++= introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)) 
+        //        val res = SNode(i.nodeName, i.typeInfo, a, i.fieldProxy, i.lengthDescriptorSize)
+        //        res ++= introspect(TypeInsight("adaptedValue", adapter.toTypeInfo)) 
         res
       case _ =>
         //before analyzing its structure, it must prove to be serializable.
@@ -101,6 +106,7 @@ class Introspector {
         val fields = (i.typeInfo.erasure.getFields() ++ i.typeInfo.erasure.getDeclaredFields() toSet: Set[Field]).collect(sfieldOnly)
         val methods = (i.typeInfo.erasure.getMethods() ++ i.typeInfo.erasure.getDeclaredMethods() toSet: Set[Method]).collect(sfieldOnly)
         val allFields = fields.toSeq ++ methods.toSeq
+
         val nodes = allFields.sortBy(_._1.order) map {
           case (settings, f: Field) =>
             f.setAccessible(true)
