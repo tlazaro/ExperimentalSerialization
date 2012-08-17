@@ -79,7 +79,7 @@ class Introspector {
       case _ =>
         //before analyzing its structure, it must prove to be serializable.
         if (!i.typeInfo.erasure.isAnnotationPresent(classOf[Serializable]))
-          throw new IllegalArgumentException("Class " + i.typeInfo + " is not annotated Serializable")
+          throw new IllegalArgumentException("Class " + i.typeInfo + " is not annotated Serializable in Type: " + i)
         // validate that the struct has a no-arg constructor
         val noArgConstructor = i.typeInfo.erasure.getDeclaredConstructors() find (_.getParameterTypes().length == 0) getOrElse
           (throw new IllegalArgumentException("Class " + i.typeInfo.erasure.getName + " has no no-arg constructor."))
