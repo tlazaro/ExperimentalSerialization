@@ -3,7 +3,7 @@ import sbt._, Keys._, Path._
 object ProjectDefinition extends Build {
   lazy val root = Project("Serialization", file(".")) settings(publishSettings ++ Seq(
       libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest" % "1.7.1" % "test",
+        "org.scalatest" %% "scalatest" % "1.8" % "test",
         "com.googlecode.json-simple" % "json-simple" % "1.1" % "optional"
       ),
       javacOptions ++= Seq("-source", "1.5", "-target", "1.5"),
