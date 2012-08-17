@@ -203,7 +203,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
       val _1 = node.head
       val _2 = node.tail.head
       
-      serializer.writeBlockStart(node.name, -1, -1, out)
+      serializer.writeBlockStart(node.name, 2, node.lengthDescriptorSize, out)
       serializer.write(_1, tuple._1, out)
       serializer.write(_2, tuple._2, out)
       serializer.writeBlockEnd(node.name, out)
@@ -213,7 +213,7 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
       val _1 = node.head
       val _2 = node.tail.head
 
-      serializer.readBlockStart(node.name, -1, in)
+      serializer.readBlockStart(node.name, node.lengthDescriptorSize, in)
       val res = (serializer.read(_1, None, in), serializer.read(_2, None, in))
       serializer.readBlockEnd(node.name, in)
       res
