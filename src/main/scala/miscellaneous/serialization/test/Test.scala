@@ -88,7 +88,7 @@ object SerializationBenchMemoization extends App with SerializationBench {
 object BinarySerializerBench extends App {
   import SerializersTest._
   import scala.collection.JavaConversions._
-  val s = new serializers.BinarySerializer(new Introspector with Memoization)
+  val s = new serializers.BinarySerializer(new Introspector with Memoization with SpecializationSupport)
   val baos = new java.io.ByteArrayOutputStream(52 * 1024 * 1024)
 
   val obj = AllTypes(200.asInstanceOf[Byte], 1000, Int.MaxValue, Long.MaxValue, 34.532f, Double.MaxValue,
