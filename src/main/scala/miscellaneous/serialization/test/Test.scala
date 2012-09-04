@@ -66,23 +66,23 @@ private[test] trait SerializationBench {
 
 object SerializationBenchMemoFirst extends App with SerializationBench {
 
-  println("Not warmed up vm with memo: " + bench(10000, new Introspector with Memoization))
-  println("Warmed up vm with memo: " + bench(10000, new Introspector with Memoization))
-  println("Not warmed up vm without memo: " + bench(10000, new Introspector))
-  println("Warmed up vm without memo: " + bench(10000, new Introspector))
+  println("Not warmed up vm with memo: " + bench(10000, new Introspector with Memoization with SpecializationSupport))
+  println("Warmed up vm with memo: " + bench(10000, new Introspector with Memoization with SpecializationSupport))
+  println("Not warmed up vm without memo: " + bench(10000, new Introspector with SpecializationSupport))
+  println("Warmed up vm without memo: " + bench(10000, new Introspector with SpecializationSupport))
 }
 
 object SerializationBenchNoMemoFirst extends App with SerializationBench {
 
-  println("Not warmed up vm without memo: " + bench(10000, new Introspector))
-  println("Warmed up vm without memo: " + bench(10000, new Introspector))
-  println("Not warmed up vm with memo: " + bench(10000, new Introspector with Memoization))
-  println("Warmed up vm with memo: " + bench(10000, new Introspector with Memoization))
+  println("Not warmed up vm without memo: " + bench(10000, new Introspector with SpecializationSupport))
+  println("Warmed up vm without memo: " + bench(10000, new Introspector with SpecializationSupport))
+  println("Not warmed up vm with memo: " + bench(10000, new Introspector with Memoization with SpecializationSupport))
+  println("Warmed up vm with memo: " + bench(10000, new Introspector with Memoization with SpecializationSupport))
 }
 
 object SerializationBenchMemoization extends App with SerializationBench {
-  println("Not warmed up vm with memo: " + bench(10000, new Introspector with Memoization))
-  println("Warmed up vm with memo: " + bench(10000, new Introspector with Memoization))
+  println("Not warmed up vm with memo: " + bench(10000, new Introspector with Memoization with SpecializationSupport))
+  println("Warmed up vm with memo: " + bench(10000, new Introspector with Memoization with SpecializationSupport))
 }
 
 object BinarySerializerBench extends App {
@@ -122,6 +122,7 @@ object BinarySerializerBench extends App {
   while ({ i += 1; i < times }) {
     s.read[AllTypes](in)
   }
+  in.close()
   total = System.currentTimeMillis() - prev
   println("Reading times: " + (total, total / times.toFloat))
 }
