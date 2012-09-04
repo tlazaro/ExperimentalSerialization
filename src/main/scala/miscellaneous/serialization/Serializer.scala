@@ -7,6 +7,19 @@ trait Serializer {
 
   val introspector: Introspector
 
+  /** Writes and reads the provided instance thus making a copy of it. */
+  def copy[T: ClassManifest](t: T): T = {
+    val baos = new java.io.ByteArrayOutputStream(150)
+    write(introspector.introspect("root")(manifest), t, baos)
+    val copy = read(new java.io.ByteArrayInputStream(baos.toByteArray))(manifest)
+    try {
+      baos.close()
+    } catch {
+      case _ =>
+    }
+    copy
+  }
+  
   def write[T](ev: ClassManifest[T], t: T, out: OutputStream) {
     write(introspector.introspect("root")(ev), t, out)
   }
@@ -65,14 +78,14 @@ trait Serializer {
   def write(node: NodeDef, obj: Any, out: OutputStream) {
     @inline def valueforNode(node: NodeDef) = {
       val res = if (node.fieldProxy.isDefined) {
-//        println("Retrieving value from field " + node + " using " + node.fieldProxy)
+        //        println("Retrieving value from field " + node + " using " + node.fieldProxy)
         node.fieldProxy.get.getValue(obj.asInstanceOf[AnyRef])
       } else obj
       node.adapter match {
         case Some(adapter) =>
-//          println("Marshalling " + res + " through " + adapter + " on node " + node)
+          //          println("Marshalling " + res + " through " + adapter + " on node " + node)
           adapter.asInstanceOf[Adapter[Any, Any]].marshall(res)
-        case _             => res
+        case _ => res
       }
     }
     try {
@@ -146,11 +159,11 @@ trait Serializer {
       }
       node.adapter match {
         case Some(adapter) => adapter.asInstanceOf[Adapter[Any, Any]].unmarshall(res)
-        case _  => res
+        case _ => res
       }
     } catch {
       case se: SerializationException => throw se
-      case other                      => throw new SerializationException("Exception ocurred reading node: " + node.description, other)
+      case other => throw new SerializationException("Exception ocurred reading node: " + node.description, other)
     }
   }
 
