@@ -408,10 +408,8 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
       builder.result
     }
   }
-
-  val MapHandler = new TypeHandler with GenericInstrospection {
-    val handledTypes = Seq(classManifest[collection.Map[_, _]])
-
+  
+  trait GenericMapHandler extends TypeHandler with GenericInstrospection {
     def serialize(node: NodeDef, obj: Any, serializer: Serializer, out: OutputStream) {
       val map = obj.asInstanceOf[Map[_, _]]
       val keyNode = node.head
@@ -445,6 +443,13 @@ class BuiltinTypeHandlers extends TypeHandlerProvider {
       serializer.readBlockEnd(node.name, in)
       res.result
     }
+  }
+  
+  val SortedMapHandler = new GenericMapHandler {
+    val handledTypes = Seq(classManifest[collection.SortedMap[_, _]])
+  }
+  val MapHandler = new GenericMapHandler {
+    val handledTypes = Seq(classManifest[collection.Map[_, _]])
   }
 
   private[this] var cachedBuilders: Map[Class[_], () => scala.collection.mutable.Builder[Any, _]] = Map.empty
