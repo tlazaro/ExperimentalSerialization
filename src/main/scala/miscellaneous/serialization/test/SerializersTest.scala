@@ -41,8 +41,8 @@ object SerializersTest {
                       @(SField @field)(15) cal: java.util.Calendar,
                       @(SField @field)(16) specializedByteArray: Array[Byte],
                       @(SField @field)(17) simpleArray: Array[String],
-                      @(SField @field)(18) weekDay: WeekDay.WeekDay,
-                      @(SField @field)(19) weekDay2: WeekDay2.WeekDay2,
+                      @(SField @field)(18) weekDay: WeekDay.Value,
+                      @(SField @field)(19) weekDay2: WeekDay2.Value,
                       @(SField @field)(20)@(specializedFor @field)(target=classOf[Tuple2[_, _]], params=Array(classOf[Int], classOf[Int])) rawTuple2: (Int, Int),
                       @(SField @field)(21)@(specializedFor @field)(target=classOf[Tuple2[_, _]], params=Array(classOf[Int], classOf[String])) mixedTuple2: (Int, String)) {
     private def this() = this(0, 0, 0, 0, 0, 0, false, '0', null, null, null, null, null, null, null, null, null, null,
