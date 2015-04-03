@@ -6,7 +6,7 @@ private[serialization] object ReflectionUtilities {
   def calculateManifest(typpe: Type): ClassManifest[_] = {
     typpe match {
       case pt: ParameterizedType => new ClassManifest[AnyRef] {
-        def erasure = pt.getRawType().asInstanceOf[Class[_]]
+        def runtimeClass = pt.getRawType().asInstanceOf[Class[_]]
         override def typeArguments = pt.getActualTypeArguments().map(calculateManifest).toList
         override def toString = (if (erasure.isArray) "Array" else erasure.getName) + argString
       }

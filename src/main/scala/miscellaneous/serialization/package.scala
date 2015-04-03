@@ -1,8 +1,8 @@
 package miscellaneous
 
-package object serialization {
-  import scala.annotation.target._
+import scala.annotation.meta.field
 
+package object serialization {
   type specializedField = specializedFor @field
   type AField = SField @field
 }

@@ -1,7 +1,7 @@
 package miscellaneous.serialization
 package test
 
-import scala.annotation.target._
+import scala.annotation.meta.field
 
 trait Base {
 

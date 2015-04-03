@@ -1,6 +1,7 @@
 package miscellaneous.serialization
 package test
-import scala.annotation.target.field
+
+import scala.annotation.meta.field
 
 object SerializersTest {
 
